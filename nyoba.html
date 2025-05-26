@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monitoring Salinitas Real-Time - Kelompok 5 Oseanografi ITB</title>
+  <style>
+    /* Reset dan base */
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #e0f7fa;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background-color: rgba(0, 38, 66, 0.85);
+      padding: 12px 30px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.7);
+      user-select: none;
+    }
+    header img {
+      height: 50px;
+      width: auto;
+    }
+    header h1 {
+      font-weight: 700;
+      font-size: 1.9rem;
+      color: #80deea;
+      margin: 0;
+      flex-grow: 1;
+      text-shadow: 0 0 6px #26c6da;
+    }
+    header p {
+      font-style: italic;
+      font-weight: 500;
+      color: #b2ebf2;
+      margin: 0;
+      font-size: 1rem;
+    }
+    main {
+      flex-grow: 1;
+      background-color: rgba(0, 38, 66, 0.8);
+      margin: 20px auto 40px auto;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 1000px;
+      width: 95%;
+      box-shadow: 0 0 20px rgba(0, 150, 180, 0.7);
+    }
+    section {
+      margin-bottom: 50px;
+    }
+    h2 {
+      font-weight: 700;
+      color: #4dd0e1;
+      border-bottom: 2px solid #00acc1;
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 8px #26c6da;
+    }
+    #salinity-value {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #00e5ff;
+      text-align: center;
+      margin-bottom: 25px;
+      text-shadow: 0 0 8px #00bcd4;
+    }
+    canvas {
+      display: block;
+      max-width: 100%;
+      margin: 0 auto;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #00bcd4aa;
+      background-color: rgba(0,0,0,0.3);
+      padding: 15px;
+    }
+    button#btn-refresh {
+      display: block;
+      margin: 0 auto 35px auto;
+      padding: 12px 28px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      background-color: #00bcd4;
+      border: none;
+      border-radius: 30px;
+      color: #004d40;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 188, 212, 0.5);
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button#btn-refresh:hover {
+      background-color: #0097a7;
+      color: #e0f2f1;
+    }
+    p.conclusion-text, p.project-text {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #b2ebf2;
+      text-align: justify;
+      text-shadow: 0 0 3px #00838f;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 0.9rem;
+      color: #80deea;
+      user-select: none;
+      background-color: rgba(0, 38, 66, 0.85);
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.15);
+    }
+
+    @media(max-width: 640px) {
+      header {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      header h1 {
+        font-size: 1.5rem;
+        text-align: center;
+      }
+      button#btn-refresh {
+        width: 100%;
+        font-size: 1rem;
+        padding: 12px 0;
+      }
+      #salinity-value {
+        font-size: 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://upload.wikimedia.org/wikipedia/id/thumb/5/5e/Logo_ITB.svg/120px-Logo_ITB.svg.png" alt="Logo ITB" />
+    <h1>Monitoring Salinitas Real-Time</h1>
+    <p>Kelompok 5 - Mata Kuliah Design Oseanografi ITB</p>
+  </header>
+
+  <main>
+    <section id="monitoring">
+      <h2>Data Salinitas Saat Ini (PSU)</h2>
+      <div id="salinity-value">--</div>
+      <button id="btn-refresh" title="Klik untuk mengambil data terbaru">Tampilkan Data Salinitas Real-Time</button>
+      <canvas id="salinityChart" height="180"></canvas>
+    </section>
+
+    <section id="conclusion">
+      <h2>Kesimpulan</h2>
+      <p class="conclusion-text">
+        Monitoring salinitas secara real-time ini membantu memantau perubahan kadar garam laut yang dipengaruhi oleh berbagai faktor lingkungan. Data ini penting untuk pengelolaan sumber daya laut dan penelitian oseanografi. Sistem ini menyediakan antarmuka mudah dan visualisasi grafik yang intuitif.
+      </p>
+    </section>
+
+    <section id="project">
+      <h2>Proyek dan Implementasi</h2>
+      <p class="project-text">
+        Proyek ini dikembangkan sebagai bagian dari tugas kelompok mata kuliah Design Oseanografi ITB. Data disimulasikan mengikuti pola data nyata dari NASA/BMKG untuk memberikan gambaran kondisi salinitas laut secara aktual. Selanjutnya, pengembangan dapat dilanjutkan dengan integrasi data sensor LoRa atau satelit langsung.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2025 Kelompok 5 Oseanografi ITB
+  </footer>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const salinityDisplay = document.getElementById('salinity-value');
+    const btnRefresh = document.getElementById('btn-refresh');
+    const ctx = document.getElementById('salinityChart').getContext('2d');
+
+    let labels = [];
+    let dataSalinity = [];
+
+    // Setup Chart.js
+    const salinityChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Salinitas (PSU)',
+          data: dataSalinity,
+          borderColor: '#00e5ff',
+          backgroundColor: 'rgba(0, 229, 255, 0.3)',
+          fill: true,
+          tension: 0.25,
+          pointRadius: 4,
+          pointHoverRadius: 7,
+          borderWidth: 3,
+        }]
+      },
+      options: {
+        animation: false,
+        responsive: true,
+        scales: {
+          y: {
+            min: 28,
+            max: 38,
+            ticks: {
+              stepSize: 1
+            },
+            title: {
+              display: true,
+              text: 'PSU'
+            },
+            grid: {
+              color: 'rgba(0, 229, 255, 0.2)'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Waktu'
+            },
+            grid: {
+              color: 'rgba(0, 229, 255, 0.1)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#b2ebf2',
+              font: {
+                weight: 'bold'
+              }
+            }
+          },
+          tooltip: {
+            enabled: true,
+            backgroundColor: '#00838f',
+            titleColor: '#e0f7fa',
+            bodyColor: '#e0f7fa',
+            cornerRadius: 6,
+            displayColors: false
+          }
+        }
+      }
+    });
+
+    // Fungsi untuk mendapatkan waktu sekarang HH:MM:SS
+    function getCurrentTime() {
+      return new Date().toLocaleTimeString();
+    }
+
+    // Simulasi fetch data salinitas dari NASA/BMKG (atau API nyata)
+    async function fetchSalinityData() {
+      // Simulasi data sebenarnya bisa diganti fetch ke API NASA/BMKG
+      // Contoh: await fetch('https://api.bmkg.go.id/...')
+
+      // Data contoh simulasi mengacu ke rentang salinitas realistis
+      const simulatedValue = 31 + Math.random() * 6; 
+      // Bisa modifikasi agar pola data lebih realistis, misalnya pakai sine wave atau data asli
+
+      return {
+        timestamp: new Date().toISOString(),
+        salinity: simulatedValue
+      };
+    }
+
+    async function updateData() {
+      const data = await fetchSalinityData();
+
+      const time = new Date(data.timestamp).toLocaleTimeString();
+      const salinity = data.salinity.toFixed(2);
+
+      salinityDisplay.textContent = `${salinity} PSU`;
+
+      if(labels.length >= 30) {
+        labels.shift();
+        dataSalinity.shift();
+      }
+      labels.push(time);
+      dataSalinity.push(salinity);
+
+      salinityChart.update();
+    }
+
+    // Event tombol refresh data
+    btnRefresh.addEventListener('click', () => {
+      btnRefresh.disabled = true;
+      btnRefresh.textContent = 'Memuat data...';
+      updateData().then(() => {
+        btnRefresh.disabled = false;
+        btnRefresh.textContent = 'Tampilkan Data Salinitas Real-Time';
+      });
+    });
+
+    // Auto-load data pertama kali saat halaman dibuka
+    updateData();
+  </script>
+</body>
+</html>
